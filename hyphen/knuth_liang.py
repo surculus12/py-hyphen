@@ -2,8 +2,9 @@
 Handles hyphenation of words or sentences
 """
 
-from .language_patterns import LanguagePatterns
 from string import digits
+from .language_patterns import LanguagePatterns
+
 
 class KnuthLiang(object):
     """
