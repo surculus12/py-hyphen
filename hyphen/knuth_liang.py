@@ -3,7 +3,7 @@ Handles hyphenation of words or sentences
 """
 
 from .language_patterns import LanguagePatterns
-
+from string import digits
 
 class KnuthLiang(object):
     """
@@ -18,28 +18,24 @@ class KnuthLiang(object):
     def hyphenate_word(self, word):
         "Hyphenates a word"
         word = '.' + word + '.'
-        word_length = len(word)
+        word_len = len(word)
         found_patterns = dict()
-        for left_pos in range(word_length + 1):
-            for right_pos in range(self.limit_left, word_length-left_pos+1):
-                word_concat = word[left_pos:right_pos]
-                if word_concat not in self.language_patterns:
-                    continue
 
-                pattern = self.language_patterns[word_concat]
-                # TODO: Find simplification to this step
-                digit_cnt = 1
-                for i, char in enumerate(pattern):
-                    if not char.isdigit():
-                        continue
+        # we find all the patterns that match our word
+        patterns = ((self.language_patterns[word[l:r]], l)
+                    for l in range(word_len) for r in range(word_len-l)
+                    if word[l:r] in self.language_patterns)
+        for pattern, left_position in patterns:
+            # double enumeration to save i (index in pattern)
+            #   and j (index in digit tuple)
+            patts = [(i, p) for i, p in enumerate(pattern) if p in digits]
+            for j, (i, char) in enumerate(patts):
+                digit_pos = left_position + i - j - 1
+                if (digit_pos not in found_patterns or
+                        found_patterns[digit_pos] < int(char)):
+                    found_patterns[digit_pos] = int(char)
 
-                    digit_pos = left_pos + i - digit_cnt
-                    if (digit_pos not in found_patterns or
-                            found_patterns[digit_pos] < int(char)):
-                        found_patterns[digit_pos] = int(char)
-
-                    digit_cnt += 1
-
+        # we find all the odd-numbered digits in the pattern and hyphenate
         hyphens = (h for h in found_patterns.keys() if found_patterns[h] & 1)
         for i, hyphen in enumerate(hyphens):
             index = i + hyphen + 1
