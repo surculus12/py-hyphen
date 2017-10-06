@@ -22,21 +22,17 @@ class KnuthLiang(object):
         word_len = len(word)
         found_patterns = dict()
 
-        # we find all the patterns that match our word
-        # !!! The nested for-loop in O(n!), which could be
-        #       avoided by e.g. using a tree to store the pattern.
-        patterns = ((self.language_patterns[word[l:r]], l)
-                    for l in range(word_len) for r in range(word_len)
-                    if word[l:r] in self.language_patterns)
-        for pattern, left_position in patterns:
-            # double enumeration to save i (index in pattern)
-            #   and j (index in digit tuple)
-            patts = [(i, p) for i, p in enumerate(pattern) if p in digits]
-            for j, (i, char) in enumerate(patts):
-                digit_pos = left_position + i - j - 1
-                if (digit_pos not in found_patterns or
-                        found_patterns[digit_pos] < int(char)):
-                    found_patterns[digit_pos] = int(char)
+        for left_pos in range(word_len):
+            word_concat = word[left_pos:]
+            for pattern in self.language_patterns.iterate(word_concat):
+                # double enumeration to save i (index in pattern)
+                #   and j (index in digit tuple)
+                patts = [(i, p) for i, p in enumerate(pattern) if p in digits]
+                for j, (i, char) in enumerate(patts):
+                    digit_pos = left_pos + i - j - 1
+                    if (digit_pos not in found_patterns or
+                            found_patterns[digit_pos] < int(char)):
+                        found_patterns[digit_pos] = int(char)
 
         # we don't hyphen at the left-right limits
         for i in (range(0, self.limit_left) +

@@ -3,9 +3,10 @@ Parses hyphenation rules for a language
 """
 
 from string import digits
+from .trie import Trie
 
 
-class LanguagePatterns(dict):
+class LanguagePatterns(Trie):
     """
     This class handles language-specific
     rules for hyphenation
@@ -13,12 +14,10 @@ class LanguagePatterns(dict):
 
     def __init__(self, code):
         super(LanguagePatterns, self).__init__()
-
         __lang_code__ = code
-
         self.parse_language()
 
-    def gen_language_patterns(self):
+    def iterate_language_patterns(self):
         "Generate language patterns from .tex pattern file"
         with open('hyphen/lang/english.tex') as lang:
             amreadingpatterns = False
@@ -39,6 +38,6 @@ class LanguagePatterns(dict):
 
     def parse_language(self):
         "Parses the language patterns into a usable dictionary"
-        for pattern in self.gen_language_patterns():
+        for pattern in self.iterate_language_patterns():
             key = pattern.translate(None, digits)
-            self[key] = pattern
+            self.insert(key, pattern)
