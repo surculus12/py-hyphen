@@ -23,8 +23,10 @@ class KnuthLiang(object):
         found_patterns = dict()
 
         # we find all the patterns that match our word
+        # !!! The nested for-loop in O(n!), which could be
+        #       avoided by e.g. using a tree to store the pattern.
         patterns = ((self.language_patterns[word[l:r]], l)
-                    for l in range(word_len) for r in range(word_len-l)
+                    for l in range(word_len) for r in range(word_len)
                     if word[l:r] in self.language_patterns)
         for pattern, left_position in patterns:
             # double enumeration to save i (index in pattern)
@@ -35,6 +37,11 @@ class KnuthLiang(object):
                 if (digit_pos not in found_patterns or
                         found_patterns[digit_pos] < int(char)):
                     found_patterns[digit_pos] = int(char)
+
+        # we don't hyphen at the left-right limits
+        for i in (range(0, self.limit_left) +
+                  range(word_len - self.limit_right, word_len)):
+            found_patterns[i] = 0
 
         # we find all the odd-numbered digits in the pattern and hyphenate
         hyphens = (h for h in found_patterns.keys() if found_patterns[h] & 1)
