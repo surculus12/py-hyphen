@@ -1,4 +1,4 @@
-"""
+"""Hyphen
 An implementation of knuth-liang in python
 """
 

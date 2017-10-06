@@ -1,5 +1,5 @@
 """
-Handles hyphenation of words or sentences
+Our implementation of knuth-liang
 """
 
 from string import digits
@@ -8,17 +8,25 @@ from .language_patterns import LanguagePatterns
 
 class KnuthLiang(object):
     """
-    This class handles hyphenation
+    This class implements knuth-liang
     """
 
-    def __init__(self, code, limit_left=2, limit_right=3):
-        self.language_patterns = LanguagePatterns(code)
+    __slots__ = ['language_patterns', 'limit_left', 'limit_right',
+                 'usecache', 'cache']
+
+    def __init__(self, lang_code, limit_left=2, limit_right=3, usecache=False):
+        self.language_patterns = LanguagePatterns(lang_code)
         self.limit_left = limit_left
         self.limit_right = limit_right
+        self.usecache = usecache
+        self.cache = {}
 
-    def hyphenate_word(self, word):
+    def hyphenate_word(self, word_input):
         "Hyphenates a word"
-        word = '.' + word + '.'
+        if self.usecache and word_input in self.cache:
+            return self.cache[word_input]
+
+        word = '.' + word_input + '.'
         word_len = len(word)
         found_patterns = dict()
 
@@ -45,4 +53,12 @@ class KnuthLiang(object):
             index = i + hyphen + 1
             word = word[:index] + '-' + word[index:]
 
-        return word[1:-1]
+        word = word[1:-1]
+        if self.usecache:
+            self.cache[word_input] = word
+
+        return word
+
+    def clear_cache(self):
+        "Clears local cache"
+        self.cache = {}
