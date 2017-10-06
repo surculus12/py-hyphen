@@ -39,4 +39,9 @@ class LanguagePatterns(Trie):
         "Parses the language patterns into a usable dictionary"
         for pattern in self.iterate_language_patterns(lang_code):
             key = pattern.translate(None, digits)
-            self.insert(key, pattern)
+            value = {}
+            # stores trie value as a dictionary with key='position in word'
+            #   and value='pattern weight'
+            for i, p in ((i, p) for i, p in enumerate(pattern) if p in digits):
+                value[i + len(value.keys())] = int(p)
+            self.insert(key, value)
