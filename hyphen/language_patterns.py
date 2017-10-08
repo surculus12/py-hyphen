@@ -2,8 +2,13 @@
 Our language pattern
 """
 
+import urllib2
+from contextlib import closing
 from string import digits
 from .trie import Trie
+
+_PATTERN_REPO = \
+'http://ctan.uib.no/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-{0}.tex'
 
 
 class LanguagePatterns(Trie):
@@ -11,14 +16,21 @@ class LanguagePatterns(Trie):
     This class creates a trie of a language pattern
     """
 
-    def __init__(self, lang_code):
-        super(LanguagePatterns, self).__init__()
-        self.parse_language(lang_code)
+    __slots__ = ["lang_code", "file_path"]
 
-    def iterate_language_patterns(self, lang_code):
+    def __init__(self, lang_code, file_path):
+        if not lang_code and not file_path:
+            raise Exception("lang_code or file_path need to be supplied")
+        super(LanguagePatterns, self).__init__()
+        self.lang_code = lang_code
+        self.file_path = file_path
+        self.parse_language()
+
+
+    def iterate_language_patterns(self):
         "Generate language patterns from .tex pattern file"
-        # TODO: Fetch via lang_code
-        with open('hyphen/lang/english.tex') as lang:
+        with open(self.file_path) if self.file_path else \
+             closing(urllib2.urlopen(_PATTERN_REPO.format(self.lang_code))) as lang:
             amreadingpatterns = False
             # read file line-by-line
             for line in lang:
@@ -35,9 +47,9 @@ class LanguagePatterns(Trie):
                 elif line[:10] == r"\patterns{":
                     amreadingpatterns = True
 
-    def parse_language(self, lang_code):
+    def parse_language(self):
         "Parses the language patterns into a usable dictionary"
-        for pattern in self.iterate_language_patterns(lang_code):
+        for pattern in self.iterate_language_patterns():
             key = pattern.translate(None, digits)
             value = {}
             # stores trie value as a dictionary with key='position in word'

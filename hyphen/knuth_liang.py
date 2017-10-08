@@ -14,8 +14,8 @@ class KnuthLiang(object):
 
     __slots__ = ['language_patterns', 'limit_left', 'limit_right']
 
-    def __init__(self, lang_code, limit_left=2, limit_right=3):
-        self.language_patterns = LanguagePatterns(lang_code)
+    def __init__(self, lang_code=None, file_path=None, limit_left=2, limit_right=3):
+        self.language_patterns = LanguagePatterns(lang_code, file_path)
         self.limit_left = limit_left
         self.limit_right = limit_right
 
@@ -26,7 +26,7 @@ class KnuthLiang(object):
         found_patterns = OrderedDict()  # key order matters later
 
         for left_pos in range(word_len):
-            for pattern in self.language_patterns.iterate(word[left_pos:]):
+            for pattern in self.language_patterns.iterate(word[left_pos:].lower()):
                 for patt_pos in pattern:
                     index = patt_pos + left_pos - 1
                     if (index not in found_patterns or
